@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api, type ApiMandate } from "@/lib/api";
+import { chainMandatesOf } from "@/lib/chain";
 import { config } from "@/lib/config";
 import { payflow } from "@/lib/payflow";
 import { useWallet } from "@/lib/wallet";
@@ -24,7 +25,17 @@ export default function AccountPage() {
       api.mandatesOf(address),
     ]);
     if (bal.status === "fulfilled") setBalance(bal.value);
-    if (res.status === "fulfilled") setMandates(res.value?.mandates ?? []);
+
+    if (res.status === "fulfilled" && res.value) {
+      setMandates(res.value.mandates);
+    } else {
+      // No indexer: read the subscriber's mandates from the contract.
+      try {
+        setMandates(await chainMandatesOf(address, address));
+      } catch {
+        setMandates([]);
+      }
+    }
   }, [address]);
 
   useEffect(() => {

@@ -1,0 +1,56 @@
+name: Deploy demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two deployments at once; let an in-flight one finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          # Project pages are served from /<repo>/.
+          NEXT_PUBLIC_BASE_PATH: /payflow-frontend
+          NEXT_PUBLIC_SOROBAN_RPC_URL: https://soroban-testnet.stellar.org
+          NEXT_PUBLIC_NETWORK_PASSPHRASE: "Test SDF Network ; September 2015"
+          NEXT_PUBLIC_STELLAR_NETWORK: TESTNET
+          NEXT_PUBLIC_PLAN_REGISTRY_ID: CABL5QWEQKMAIDXTQCHEJ2TAAPYUHSQDY73Z4LIK6BOBGYUYO7RG6HJA
+          NEXT_PUBLIC_VAULT_ID: CBWDD6KVMLEH2D5IVPHZJW4TLLL2RVWGNJRN2US6INNBFTH35K2KYSF7
+          NEXT_PUBLIC_SUBSCRIPTION_ID: CBKQVZGZJMY47JFRCOF2RFKEMTTYKUF4LI54AOB6EGDFODNZU7MSUW6K
+          NEXT_PUBLIC_TOKEN_ID: CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
+          NEXT_PUBLIC_READ_SOURCE: GAEWDXVDI3WI35TWTZXNQ4NTRYIG6J34XPRSNKX655LBA377M5ZOCBY5
+          # No public backend. The app falls back to reading contract state.
+          NEXT_PUBLIC_API_URL: ""
+      # Stop Pages running the output through Jekyll, which drops _next/.
+      - run: touch out/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

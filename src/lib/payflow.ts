@@ -249,6 +249,27 @@ export const payflow = {
       arg.u64(mandateId),
     ]),
 
+  merchantPlans: (source: string, merchant: string) =>
+    readContract<bigint[]>(config.contracts.planRegistry, "merchant_plans", source, [
+      arg.address(merchant),
+    ]),
+
+  subscriberMandates: (source: string, subscriber: string) =>
+    readContract<bigint[]>(
+      config.contracts.subscription,
+      "subscriber_mandates",
+      source,
+      [arg.address(subscriber)],
+    ),
+
+  merchantMandates: (source: string, merchant: string) =>
+    readContract<bigint[]>(
+      config.contracts.subscription,
+      "merchant_mandates",
+      source,
+      [arg.address(merchant)],
+    ),
+
   isDue: (source: string, mandateId: number | bigint) =>
     readContract<boolean>(config.contracts.subscription, "is_due", source, [
       arg.u64(mandateId),

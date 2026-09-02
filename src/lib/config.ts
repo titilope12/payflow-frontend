@@ -19,6 +19,14 @@ export const config = {
     process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE ?? "Test SDF Network ; September 2015",
   network: process.env.NEXT_PUBLIC_STELLAR_NETWORK ?? "TESTNET",
   apiUrl: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080",
+  /**
+   * Source account used for read-only contract simulation before a wallet is
+   * connected. Simulation never touches this account — it only has to exist on
+   * the network. Defaults to the deployer of the public testnet suite.
+   */
+  readSource:
+    process.env.NEXT_PUBLIC_READ_SOURCE ??
+    "GAEWDXVDI3WI35TWTZXNQ4NTRYIG6J34XPRSNKX655LBA377M5ZOCBY5",
   contracts: {
     planRegistry: process.env.NEXT_PUBLIC_PLAN_REGISTRY_ID ?? "",
     vault: process.env.NEXT_PUBLIC_VAULT_ID ?? "",

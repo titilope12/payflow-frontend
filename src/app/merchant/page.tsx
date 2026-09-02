@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { api, type ApiMandate, type ApiPlan, type MerchantSummary } from "@/lib/api";
+import { chainMandatesFor, chainMerchantSummary, chainPlansOf } from "@/lib/chain";
 import { config } from "@/lib/config";
 import { payflow } from "@/lib/payflow";
 import { useWallet } from "@/lib/wallet";
@@ -35,9 +36,30 @@ export default function MerchantPage() {
       api.mandatesFor(address),
       api.merchantSummary(address),
     ]);
-    setPlans(p?.plans ?? []);
-    setMandates(m?.mandates ?? []);
-    setSummary(s);
+    if (p) {
+      setPlans(p.plans);
+    } else {
+      try {
+        setPlans(await chainPlansOf(address, address));
+      } catch {
+        setPlans([]);
+      }
+    }
+
+    let rows: ApiMandate[] = [];
+    if (m) {
+      rows = m.mandates;
+    } else {
+      try {
+        rows = await chainMandatesFor(address, address);
+      } catch {
+        rows = [];
+      }
+    }
+    setMandates(rows);
+
+    // Revenue totals come from charge history, which only the indexer has.
+    setSummary(s ?? (chainMerchantSummary(address, rows) as unknown as MerchantSummary));
   }, [address]);
 
   useEffect(() => {
@@ -71,7 +93,7 @@ export default function MerchantPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat
           label="Collected"
-          value={summary ? `${fromStroops(summary.totalCollected)}` : "…"}
+          value={summary?.totalCollected ? `${fromStroops(summary.totalCollected)}` : "—"}
           hint="XLM, net of protocol fee"
         />
         <Stat label="Active mandates" value={summary?.activeMandates ?? "…"} />

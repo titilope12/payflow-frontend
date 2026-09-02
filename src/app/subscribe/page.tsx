@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { api, type ApiPlan } from "@/lib/api";
+import { chainPlans } from "@/lib/chain";
+import { config } from "@/lib/config";
 import { payflow } from "@/lib/payflow";
 import { useWallet } from "@/lib/wallet";
 import { formatPeriod, fromStroops } from "@/lib/format";
@@ -12,13 +15,26 @@ export default function SubscribePage() {
   const [plans, setPlans] = useState<ApiPlan[] | null>(null);
   const [maxCharges, setMaxCharges] = useState<Record<number, string>>({});
   const [busy, setBusy] = useState<number | null>(null);
+  const [direct, setDirect] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const res = await api.plans();
-    setPlans(res?.plans ?? []);
-  }, []);
+    if (res) {
+      setPlans(res.plans);
+      setDirect(false);
+      return;
+    }
+    // No indexer: enumerate straight from the registry.
+    try {
+      setPlans(await chainPlans(address ?? config.readSource));
+      setDirect(true);
+    } catch {
+      setPlans([]);
+      setDirect(true);
+    }
+  }, [address]);
 
   useEffect(() => {
     void load();
@@ -56,13 +72,19 @@ export default function SubscribePage() {
         <h1 className="text-2xl font-semibold tracking-tight">Available plans</h1>
         <p className="mt-1 text-sm text-muted">
           Subscribing opens a mandate. Fund your vault on the{" "}
-          <a href="/account" className="text-accent hover:underline">
+          <Link href="/account" className="text-accent hover:underline">
             account page
-          </a>{" "}
+          </Link>{" "}
           or charges will fail for lack of balance.
         </p>
       </div>
 
+      {direct && (
+        <Notice tone="info">
+          Reading plans directly from the contract — the indexer is not
+          reachable, so this list is capped at the first 24 plans.
+        </Notice>
+      )}
       {error && <Notice tone="error">{error}</Notice>}
       {done && (
         <Notice tone="ok">
