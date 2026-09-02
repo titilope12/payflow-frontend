@@ -45,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <span>Stellar testnet · unaudited · do not use with real funds</span>
                 <a
-                  href="https://github.com/payflow-protocol"
+                  href="https://github.com/titilope12"
                   target="_blank"
                   rel="noreferrer"
                   className="hover:text-slate-200"

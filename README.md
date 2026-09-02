@@ -5,8 +5,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/payflow-protocol/payflow-frontend/actions/workflows/ci.yml">
-    <img alt="CI" src="https://github.com/payflow-protocol/payflow-frontend/actions/workflows/ci.yml/badge.svg"/>
+  <a href="https://github.com/titilope12/payflow-frontend/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/titilope12/payflow-frontend/actions/workflows/ci.yml/badge.svg"/>
   </a>
   <img alt="Next.js" src="https://img.shields.io/badge/next.js-15-black"/>
   <img alt="React" src="https://img.shields.io/badge/react-19-blue"/>
@@ -58,7 +58,7 @@ npm run dev
 Open http://localhost:3000 and connect Freighter (or any wallet the
 Stellar Wallets Kit supports) set to **Testnet**.
 
-To see plans and history, run [payflow-backend](https://github.com/payflow-protocol/payflow-backend)
+To see plans and history, run [payflow-backend](https://github.com/titilope12/payflow-backend)
 alongside it on port 8080.
 
 ## Environment
@@ -107,9 +107,9 @@ codes into sentences a user can act on.
 
 | Repo | Role |
 |---|---|
-| [payflow-contract](https://github.com/payflow-protocol/payflow-contract) | Soroban contracts this app calls |
-| [payflow-backend](https://github.com/payflow-protocol/payflow-backend) | Indexer and API this app reads |
-| [payflow-frontend](https://github.com/payflow-protocol/payflow-frontend) | This repo |
+| [payflow-contract](https://github.com/titilope12/payflow-contract) | Soroban contracts this app calls |
+| [payflow-backend](https://github.com/titilope12/payflow-backend) | Indexer and API this app reads |
+| [payflow-frontend](https://github.com/titilope12/payflow-frontend) | This repo |
 
 ## Contributing
 
@@ -123,12 +123,12 @@ See [SECURITY.md](SECURITY.md). Unaudited, testnet only.
 
 | Name | Role | Contact |
 |---|---|---|
-| _add your name_ | Lead maintainer | _add your Telegram_ |
+| Victor Adeleke | Lead maintainer | [@titilope12](https://github.com/titilope12) |
 
 ## Contributors
 
-<a href="https://github.com/payflow-protocol/payflow-frontend/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=payflow-protocol/payflow-frontend"/>
+<a href="https://github.com/titilope12/payflow-frontend/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=titilope12/payflow-frontend"/>
 </a>
 
 ## License
