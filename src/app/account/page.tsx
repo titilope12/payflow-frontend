@@ -10,7 +10,7 @@ import { formatPeriod, formatWhen, fromStroops, toStroops } from "@/lib/format";
 import { AddressLink, Badge, Empty, Notice, Panel, Stat, TxLink } from "@/components/ui";
 
 export default function AccountPage() {
-  const { address, signXdr } = useWallet();
+  const { address, networkMismatch, walletNetwork, signXdr } = useWallet();
   const [balance, setBalance] = useState<bigint | null>(null);
   const [mandates, setMandates] = useState<ApiMandate[] | null>(null);
   const [amount, setAmount] = useState("");
@@ -78,6 +78,14 @@ export default function AccountPage() {
         />
       </div>
 
+      {networkMismatch && (
+        <Notice tone="error">
+          <strong>Network mismatch:</strong> Your wallet is on{" "}
+          <strong>{walletNetwork ?? "an unknown network"}</strong>, but this app
+          requires <strong>{config.networkPassphrase}</strong>. Switch your wallet
+          to the correct network to fund your vault.
+        </Notice>
+      )}
       {error && <Notice tone="error">{error}</Notice>}
       {done && (
         <Notice tone="ok">
@@ -106,7 +114,7 @@ export default function AccountPage() {
           <button
             type="button"
             className="btn-primary"
-            disabled={busy !== null}
+            disabled={busy !== null || networkMismatch}
             onClick={() =>
               void run("deposit", () =>
                 payflow.deposit(address, signXdr, config.contracts.token, toStroops(amount)),
@@ -118,7 +126,7 @@ export default function AccountPage() {
           <button
             type="button"
             className="btn-ghost"
-            disabled={busy !== null}
+            disabled={busy !== null || networkMismatch}
             onClick={() =>
               void run("withdraw", () =>
                 payflow.withdraw(address, signXdr, config.contracts.token, toStroops(amount)),
@@ -164,7 +172,7 @@ export default function AccountPage() {
                         <button
                           type="button"
                           className="btn-ghost"
-                          disabled={busy !== null}
+                          disabled={busy !== null || networkMismatch}
                           onClick={() =>
                             void run(`pause-${m.id}`, () =>
                               payflow.setPaused(
@@ -181,7 +189,7 @@ export default function AccountPage() {
                         <button
                           type="button"
                           className="btn-ghost text-rose-300"
-                          disabled={busy !== null}
+                          disabled={busy !== null || networkMismatch}
                           onClick={() =>
                             void run(`cancel-${m.id}`, () =>
                               payflow.cancel(address, signXdr, m.id),
