@@ -11,7 +11,7 @@ import { formatPeriod, fromStroops } from "@/lib/format";
 import { AddressLink, Empty, Notice, Panel, TxLink } from "@/components/ui";
 
 export default function SubscribePage() {
-  const { address, signXdr } = useWallet();
+  const { address, signXdr, networkMismatch } = useWallet();
   const [plans, setPlans] = useState<ApiPlan[] | null>(null);
   const [maxCharges, setMaxCharges] = useState<Record<number, string>>({});
   const [busy, setBusy] = useState<number | null>(null);
@@ -135,10 +135,10 @@ export default function SubscribePage() {
                 <button
                   type="button"
                   className="btn-primary w-full"
-                  disabled={busy === plan.id || !address}
+                  disabled={busy === plan.id || !address || networkMismatch}
                   onClick={() => void subscribe(plan)}
                 >
-                  {busy === plan.id ? "Confirming…" : address ? "Subscribe" : "Connect wallet"}
+                  {busy === plan.id ? "Confirming…" : networkMismatch ? "Wrong network" : address ? "Subscribe" : "Connect wallet"}
                 </button>
               </div>
             </Panel>

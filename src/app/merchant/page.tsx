@@ -18,7 +18,7 @@ const PERIOD_OPTIONS = [
 ];
 
 export default function MerchantPage() {
-  const { address, signXdr } = useWallet();
+  const { address, signXdr, networkMismatch } = useWallet();
   const [plans, setPlans] = useState<ApiPlan[] | null>(null);
   const [mandates, setMandates] = useState<ApiMandate[] | null>(null);
   const [summary, setSummary] = useState<MerchantSummary | null>(null);
@@ -145,7 +145,7 @@ export default function MerchantPage() {
           <button
             type="button"
             className="btn-primary"
-            disabled={busy !== null}
+            disabled={busy !== null || networkMismatch}
             onClick={() =>
               void run("create", () =>
                 payflow.createPlan(address, signXdr, {
@@ -185,7 +185,7 @@ export default function MerchantPage() {
                 <button
                   type="button"
                   className="btn-ghost"
-                  disabled={busy !== null}
+                  disabled={busy !== null || networkMismatch}
                   onClick={() =>
                     void run(`toggle-${p.id}`, () =>
                       payflow.setPlanActive(address, signXdr, p.id, p.active !== 1),
@@ -233,7 +233,7 @@ export default function MerchantPage() {
                     <button
                       type="button"
                       className="btn-primary"
-                      disabled={busy !== null}
+                      disabled={busy !== null || networkMismatch}
                       onClick={() =>
                         void run(`charge-${m.id}`, () =>
                           payflow.charge(address, signXdr, m.id),

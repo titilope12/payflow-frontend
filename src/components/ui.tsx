@@ -94,3 +94,27 @@ export function Notice({ tone, children }: { tone: "error" | "ok" | "info"; chil
 export function Empty({ children }: { children: ReactNode }) {
   return <p className="py-8 text-center text-sm text-muted">{children}</p>;
 }
+
+
+export function NetworkMismatchBanner({
+  walletNetwork,
+  expectedNetwork,
+}: {
+  walletNetwork: string | null;
+  expectedNetwork: string;
+}) {
+  if (!walletNetwork) return null;
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+      <div className="flex items-center gap-2">
+        <span className="text-amber-400">⚠</span>
+        <span>
+          <strong>Network mismatch detected.</strong> Your wallet is connected to a different
+          network than this app. Switch to{" "}
+          <span className="font-mono text-xs">{expectedNetwork}</span> to interact with
+          contracts. Contract write operations are disabled while mismatched.
+        </span>
+      </div>
+    </div>
+  );
+}
