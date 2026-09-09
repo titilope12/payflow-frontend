@@ -18,7 +18,7 @@ const PERIOD_OPTIONS = [
 ];
 
 export default function MerchantPage() {
-  const { address, signXdr } = useWallet();
+  const { address, networkMismatch, walletNetwork, signXdr } = useWallet();
   const [plans, setPlans] = useState<ApiPlan[] | null>(null);
   const [mandates, setMandates] = useState<ApiMandate[] | null>(null);
   const [summary, setSummary] = useState<MerchantSummary | null>(null);
@@ -100,6 +100,14 @@ export default function MerchantPage() {
         <Stat label="Charges settled" value={summary?.chargeCount ?? "…"} />
       </div>
 
+      {networkMismatch && (
+        <Notice tone="error">
+          <strong>Network mismatch:</strong> Your wallet is on{" "}
+          <strong>{walletNetwork ?? "an unknown network"}</strong>, but this app
+          requires <strong>{config.networkPassphrase}</strong>. Switch your wallet
+          to the correct network to manage plans and charges.
+        </Notice>
+      )}
       {error && <Notice tone="error">{error}</Notice>}
       {done && (
         <Notice tone="ok">
@@ -145,7 +153,7 @@ export default function MerchantPage() {
           <button
             type="button"
             className="btn-primary"
-            disabled={busy !== null}
+            disabled={busy !== null || networkMismatch}
             onClick={() =>
               void run("create", () =>
                 payflow.createPlan(address, signXdr, {
@@ -185,7 +193,7 @@ export default function MerchantPage() {
                 <button
                   type="button"
                   className="btn-ghost"
-                  disabled={busy !== null}
+                  disabled={busy !== null || networkMismatch}
                   onClick={() =>
                     void run(`toggle-${p.id}`, () =>
                       payflow.setPlanActive(address, signXdr, p.id, p.active !== 1),
@@ -233,7 +241,7 @@ export default function MerchantPage() {
                     <button
                       type="button"
                       className="btn-primary"
-                      disabled={busy !== null}
+                      disabled={busy !== null || networkMismatch}
                       onClick={() =>
                         void run(`charge-${m.id}`, () =>
                           payflow.charge(address, signXdr, m.id),
