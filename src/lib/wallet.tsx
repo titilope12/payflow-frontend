@@ -112,11 +112,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
               STORAGE_KEY,
               JSON.stringify({ walletId: option.id, address: selected }),
             );
-            // Check network after successful connection
-            await checkNetworkMismatch();
           } catch (err) {
             setError(err instanceof Error ? err.message : "Could not read address");
-            setNetworkMismatch(false);
             setWalletNetwork(null);
           } finally {
             setConnecting(false);
