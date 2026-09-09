@@ -88,7 +88,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } catch {
       window.localStorage.removeItem(STORAGE_KEY);
     }
-  }, []);
+  }, [checkNetworkMismatch]);
 
   const connect = useCallback(async () => {
     setConnecting(true);
@@ -114,6 +114,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             );
           } catch (err) {
             setError(err instanceof Error ? err.message : "Could not read address");
+            setWalletNetwork(null);
           } finally {
             setConnecting(false);
           }
@@ -124,7 +125,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setError(err instanceof Error ? err.message : "Could not open wallet");
       setConnecting(false);
     }
-  }, []);
+  }, [checkNetworkMismatch]);
 
   const disconnect = useCallback(async () => {
     const kit = await getKit();

@@ -147,10 +147,10 @@ export default function SubscribePage() {
                 <button
                   type="button"
                   className="btn-primary w-full"
-                  disabled={busy === plan.id || !address}
+                  disabled={busy === plan.id || !address || networkMismatch}
                   onClick={() => void subscribe(plan)}
                 >
-                  {busy === plan.id ? "Confirming…" : address ? "Subscribe" : "Connect wallet"}
+                  {busy === plan.id ? "Confirming…" : networkMismatch ? "Wrong network" : address ? "Subscribe" : "Connect wallet"}
                 </button>
               </div>
             </Panel>
