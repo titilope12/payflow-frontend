@@ -3,6 +3,7 @@
 import {
   createContext,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -72,13 +73,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         walletId: string;
         address: string;
       };
-      void getKit().then((kit) => {
+      void getKit().then(async (kit) => {
         kit.setWallet(walletId);
         setAddress(saved);
         // Restore the network mismatch state for the restored session
         try {
-          const network = kit.getNetwork();
-          setWalletNetwork(network ?? null);
+          const { networkPassphrase } = await kit.getNetwork();
+          setWalletNetwork(networkPassphrase);
         } catch {
           // Wallet may not support getNetwork; treat as no mismatch
           setWalletNetwork(null);
@@ -102,8 +103,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             setAddress(selected);
             // Detect network mismatch after connection
             try {
-              const network = kit.getNetwork();
-              setWalletNetwork(network ?? null);
+              const { networkPassphrase } = await kit.getNetwork();
+              setWalletNetwork(networkPassphrase);
             } catch {
               setWalletNetwork(null);
             }
