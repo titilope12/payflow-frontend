@@ -3,7 +3,6 @@
 import {
   createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -48,28 +47,21 @@ async function getKit(): Promise<StellarWalletsKit> {
   return kitPromise;
 }
 
+function checkNetworkMismatch(walletNetwork: string | null): boolean {
+  if (!walletNetwork) return false;
+  return walletNetwork !== config.networkPassphrase;
+}
+
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [address, setAddress] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [networkMismatch, setNetworkMismatch] = useState(false);
   const [walletNetwork, setWalletNetwork] = useState<string | null>(null);
 
-  // Check if the wallet's network matches the app's expected network.
-  const checkNetworkMismatch = useCallback(async () => {
-    try {
-      const kit = await getKit();
-      const networkInfo = await kit.getNetwork();
-      const actualNetwork = networkInfo.networkPassphrase ?? networkInfo.network ?? "";
-      const expectedNetwork = config.networkPassphrase;
-      const isMismatch = Boolean(actualNetwork) && actualNetwork !== expectedNetwork;
-      setNetworkMismatch(isMismatch);
-      setWalletNetwork(actualNetwork);
-    } catch {
-      setNetworkMismatch(false);
-      setWalletNetwork(null);
-    }
-  }, []);
+  const networkMismatch = useMemo(
+    () => checkNetworkMismatch(walletNetwork),
+    [walletNetwork],
+  );
 
   // Restore the previous session without prompting the user again.
   useEffect(() => {
@@ -83,8 +75,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       void getKit().then((kit) => {
         kit.setWallet(walletId);
         setAddress(saved);
-        // Check network after restoring session
-        void checkNetworkMismatch();
+        // Restore the network mismatch state for the restored session
+        try {
+          const network = kit.getNetwork();
+          setWalletNetwork(network ?? null);
+        } catch {
+          // Wallet may not support getNetwork; treat as no mismatch
+          setWalletNetwork(null);
+        }
       });
     } catch {
       window.localStorage.removeItem(STORAGE_KEY);
@@ -102,6 +100,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             kit.setWallet(option.id);
             const { address: selected } = await kit.getAddress();
             setAddress(selected);
+            // Detect network mismatch after connection
+            try {
+              const network = kit.getNetwork();
+              setWalletNetwork(network ?? null);
+            } catch {
+              setWalletNetwork(null);
+            }
             window.localStorage.setItem(
               STORAGE_KEY,
               JSON.stringify({ walletId: option.id, address: selected }),
@@ -133,19 +138,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
     window.localStorage.removeItem(STORAGE_KEY);
     setAddress(null);
-    setNetworkMismatch(false);
     setWalletNetwork(null);
   }, []);
 
   const signXdr = useCallback<SignXdr>(
     async (xdrString) => {
       if (!address) throw new Error("Connect a wallet first.");
-      if (networkMismatch) {
-        throw new Error(
-          `Network mismatch: wallet is on a different network. ` +
-            `Switch your wallet to "${config.networkPassphrase}" to continue.`,
-        );
-      }
+      if (networkMismatch) throw new Error("Switch your wallet to the correct network first.");
       const kit = await getKit();
       const { signedTxXdr } = await kit.signTransaction(xdrString, {
         networkPassphrase: config.networkPassphrase,
@@ -158,7 +157,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<WalletState>(
     () => ({ address, connecting, error, networkMismatch, walletNetwork, connect, disconnect, signXdr }),
-    [address, connecting, error, networkMismatch, walletNetwork, connect, disconnect, signXdr],
+    [address, connecting, error, networkMismatch, walletNetwork, connect, disconnect],
   );
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;

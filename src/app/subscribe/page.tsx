@@ -11,7 +11,7 @@ import { formatPeriod, fromStroops } from "@/lib/format";
 import { AddressLink, Empty, Notice, Panel, TxLink } from "@/components/ui";
 
 export default function SubscribePage() {
-  const { address, signXdr, networkMismatch } = useWallet();
+  const { address, networkMismatch, walletNetwork, signXdr } = useWallet();
   const [plans, setPlans] = useState<ApiPlan[] | null>(null);
   const [maxCharges, setMaxCharges] = useState<Record<number, string>>({});
   const [busy, setBusy] = useState<number | null>(null);
@@ -43,6 +43,10 @@ export default function SubscribePage() {
   async function subscribe(plan: ApiPlan) {
     if (!address) {
       setError("Connect a wallet first.");
+      return;
+    }
+    if (networkMismatch) {
+      setError("Switch your wallet to the correct network first.");
       return;
     }
     setBusy(plan.id);
@@ -83,6 +87,14 @@ export default function SubscribePage() {
         <Notice tone="info">
           Reading plans directly from the contract — the indexer is not
           reachable, so this list is capped at the first 24 plans.
+        </Notice>
+      )}
+      {networkMismatch && (
+        <Notice tone="error">
+          <strong>Network mismatch:</strong> Your wallet is on{" "}
+          <strong>{walletNetwork ?? "an unknown network"}</strong>, but this app
+          requires <strong>{config.networkPassphrase}</strong>. Switch your wallet
+          to the correct network to subscribe.
         </Notice>
       )}
       {error && <Notice tone="error">{error}</Notice>}
